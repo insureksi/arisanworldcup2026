@@ -259,7 +259,7 @@
                 <div x-show="wcTab === 'teams'" class="p-6">
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                         <template x-for="team in wcTeams" :key="team.name">
-                            <div class="border rounded-lg p-4 flex flex-col items-center justify-center text-center bg-white shadow-sm hover:shadow-md transition">
+                            <div @click="openTeamModal(team)" class="border rounded-lg p-4 flex flex-col items-center justify-center text-center bg-white shadow-sm hover:shadow-lg transition cursor-pointer transform hover:-translate-y-1">
                                 <div class="mb-2"><img :src="team.flag_icon" class="w-12 h-8 rounded shadow-sm object-cover border border-slate-200" :alt="team.name"></div>
                                 <div class="font-bold text-sm text-primary leading-tight" x-text="team.name"></div>
                                 <div class="text-xs text-slate-500 mt-1" x-text="team.confed"></div>
@@ -443,6 +443,76 @@
             </div>
 
         </section>
+
+        <!-- Team Details Modal Overlay -->
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" x-show="isTeamModalOpen" x-cloak>
+            <!-- Backdrop -->
+            <div x-show="isTeamModalOpen" x-transition.opacity.duration.300ms class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="closeTeamModal"></div>
+            
+            <!-- Modal Content -->
+            <div x-show="isTeamModalOpen" x-transition.scale.95.duration.300ms class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <!-- Header -->
+                <div class="relative bg-slate-100 p-6 flex flex-col items-center justify-center border-b border-slate-200">
+                    <button @click="closeTeamModal" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition shadow-sm border border-slate-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <template x-if="selectedTeamData">
+                        <div class="flex flex-col items-center">
+                            <img :src="selectedTeamData.flag_icon" class="w-24 h-16 rounded shadow-md object-cover border border-slate-200 mb-4" :alt="selectedTeamData.name">
+                            <h2 class="text-2xl font-display font-bold text-primary" x-text="selectedTeamData.name"></h2>
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="px-2 py-1 bg-slate-200 text-slate-600 text-xs font-bold rounded shadow-inner" x-text="selectedTeamData.confed"></span>
+                                <span class="px-2 py-1 bg-accent text-white text-xs font-bold rounded shadow-inner" x-text="'Group ' + selectedTeamData.group"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Body (Scrollable) -->
+                <div class="p-6 overflow-y-auto flex flex-col gap-6">
+                    <!-- Next Match -->
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider border-b pb-2 mb-4"><i class="fas fa-calendar-alt mr-2"></i>Next Match</h3>
+                        <template x-if="nextMatchData">
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center shadow-sm">
+                                <div class="text-xs text-slate-500 font-medium mb-4 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100" x-text="nextMatchData.date"></div>
+                                <div class="flex items-center justify-between w-full px-2">
+                                    <div class="flex flex-col items-center gap-2 w-2/5 text-center">
+                                        <div x-html="getTeamFlag(nextMatchData.teamA)" class="[&>img]:w-10 [&>img]:h-7 [&>img]:mr-0"></div>
+                                        <span class="font-bold text-sm text-primary leading-tight mt-1" x-text="nextMatchData.teamA"></span>
+                                    </div>
+                                    <div class="w-1/5 flex flex-col items-center justify-center">
+                                        <span class="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm" x-show="nextMatchData.status === 'Live'">LIVE</span>
+                                        <span class="text-slate-400 font-bold text-sm" x-show="nextMatchData.status !== 'Live'">VS</span>
+                                    </div>
+                                    <div class="flex flex-col items-center gap-2 w-2/5 text-center">
+                                        <div x-html="getTeamFlag(nextMatchData.teamB)" class="[&>img]:w-10 [&>img]:h-7 [&>img]:mr-0"></div>
+                                        <span class="font-bold text-sm text-primary leading-tight mt-1" x-text="nextMatchData.teamB"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!nextMatchData">
+                            <div class="text-center p-6 border border-dashed border-slate-300 rounded-xl bg-slate-50 text-slate-500 text-sm">
+                                No upcoming matches scheduled.
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Squad & Staff (Placeholder) -->
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider border-b pb-2 mb-4"><i class="fas fa-users mr-2"></i>Squad & Staff</h3>
+                        <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-xl flex items-start gap-3 shadow-sm">
+                            <i class="fas fa-info-circle mt-0.5 text-yellow-600 text-lg"></i>
+                            <div class="text-sm">
+                                <p class="font-bold mb-1">Data Not Yet Available</p>
+                                <p class="text-yellow-700/80 leading-relaxed">Official squad lists, coaches, and player positions for the 2026 World Cup have not been finalized or announced yet. This section will be updated closer to the tournament.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Mobile Bottom Navigation -->
@@ -500,6 +570,10 @@
                 mockMatches: [],
                 mockStandings: [],
                 mockStats: { goals: 0, topTeam: '-' },
+                
+                isTeamModalOpen: false,
+                selectedTeamData: null,
+                nextMatchData: null,
 
                 async init() {
                     window.addEventListener('resize', () => {
@@ -508,7 +582,7 @@
                     
                     try {
                         // Fetch Teams
-                        const teamsRes = await fetch('https://worldcup26.ir/get/teams');
+                        const teamsRes = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://worldcup26.ir/get/teams'));
                         if (teamsRes.ok) {
                             const teamsData = await teamsRes.json();
                             this.wcTeams = teamsData.teams.map(t => ({
@@ -521,7 +595,7 @@
                         }
 
                         // Fetch Matches
-                        const response = await fetch('https://worldcup26.ir/get/games');
+                        const response = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://worldcup26.ir/get/games'));
                         const data = await response.json();
                         
                         let matches = [];
@@ -567,7 +641,7 @@
                         this.availableTeams = [...this.allTeamsFullList];
                         
                         // Fetch Groups
-                        const groupsRes = await fetch('https://worldcup26.ir/get/groups');
+                        const groupsRes = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://worldcup26.ir/get/groups'));
                         if (groupsRes.ok) {
                             const groupsData = await groupsRes.json();
                             if (groupsData && groupsData.groups) {
@@ -575,7 +649,7 @@
                                     return {
                                         name: g.name,
                                         teams: g.teams.map(t => {
-                                            const teamInfo = this.wcTeams.find(wt => wt.id === t.team_id);
+                                            const teamInfo = this.wcTeams.find(wt => wt.id == t.team_id);
                                             return {
                                                 name: teamInfo ? teamInfo.name : 'Unknown',
                                                 played: t.mp,
@@ -592,6 +666,27 @@
                     } catch (e) {
                         console.error('Failed to load WC data', e);
                     }
+                },
+                
+                openTeamModal(team) {
+                    this.selectedTeamData = team;
+                    this.nextMatchData = this.getNextMatch(team.name);
+                    this.isTeamModalOpen = true;
+                    document.body.style.overflow = 'hidden';
+                },
+                
+                closeTeamModal() {
+                    this.isTeamModalOpen = false;
+                    document.body.style.overflow = '';
+                    setTimeout(() => { this.selectedTeamData = null; }, 300);
+                },
+                
+                getNextMatch(teamName) {
+                    const futureMatches = this.mockMatches.filter(m => 
+                        (m.teamA === teamName || m.teamB === teamName) && 
+                        m.status !== 'Finished'
+                    );
+                    return futureMatches.length > 0 ? futureMatches[0] : null;
                 },
 
                 get prizePool() {
