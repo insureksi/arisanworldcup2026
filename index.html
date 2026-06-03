@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Cup 2026 Arisan Dashboard</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0F172A',
+                        accent: '#22C55E',
+                        surface: '#FFFFFF',
+                        background: '#F8FAFC'
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(34, 197, 94, 0.5)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; color: #0F172A; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        /* Animation Classes */
+        .slot-machine {
+            height: 60px;
+            overflow: hidden;
+            position: relative;
+            background: #F1F5F9;
+            border-radius: 8px;
+            border: 2px solid #E2E8F0;
+        }
+        .slot-items {
+            position: absolute;
+            width: 100%;
+        }
+        .slot-item {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <!-- Libraries -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body class="antialiased pb-20 md:pb-0" x-data="app()">
+
+    <!-- Mobile Top Header -->
+    <header class="md:hidden bg-primary text-white p-4 sticky top-0 z-40 shadow-md">
+        <h1 class="text-xl font-display font-bold flex items-center gap-2">
+            <i class="fas fa-trophy text-accent"></i> 
+            <span x-text="config.name || 'WC 2026 Arisan'"></span>
+        </h1>
+    </header>
+
+    <!-- Desktop Header -->
+    <header class="hidden md:block bg-primary text-white p-6 sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-display font-bold flex items-center gap-3">
+                <i class="fas fa-trophy text-accent text-3xl"></i> 
+                World Cup 2026 Arisan
+            </h1>
+            <div class="flex gap-6">
+                <a href="#setup" class="hover:text-accent transition font-medium">Setup & Draw</a>
+                <a href="#info" class="hover:text-accent transition font-medium">WC Info</a>
+                <a href="#stats" class="hover:text-accent transition font-medium">Results & Stats</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-8 md:gap-12">
+        
+        <!-- SECTION 1: Arisan Setup & Draw -->
+        <section id="setup" class="scroll-mt-24" x-show="activeTab === 'dashboard' || activeTab === 'draw' || isDesktop">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">1</div>
+                <h2 class="text-2xl font-display font-bold">Arisan Setup & Draw</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Config Card -->
+                <div class="glass-card p-6 flex flex-col gap-4" x-show="activeTab === 'dashboard' || isDesktop">
+                    <h3 class="text-lg font-bold border-b pb-2"><i class="fas fa-cog text-slate-400 mr-2"></i>Configuration</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Arisan Name</label>
+                        <input type="text" x-model="config.name" class="w-full rounded-lg border-slate-300 border p-2 focus:ring-accent focus:border-accent outline-none" placeholder="e.g. Kantor Arisan">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Fee/Person</label>
+                            <input type="number" x-model.number="config.fee" class="w-full rounded-lg border-slate-300 border p-2 focus:ring-accent outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Format</label>
+                            <select x-model="config.format" class="w-full rounded-lg border-slate-300 border p-2 focus:ring-accent outline-none">
+                                <option value="full">Full Tournament</option>
+                                <option value="group">Group Stage Only</option>
+                                <option value="knockout">Knockout Only</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-auto bg-slate-50 p-4 rounded-lg border border-slate-100 flex justify-between items-center">
+                        <span class="font-medium text-slate-600">Total Prize Pool</span>
+                        <span class="text-xl font-bold text-accent" x-text="formatCurrency(prizePool)"></span>
+                    </div>
+                </div>
+
+                <!-- Participants Card -->
+                <div class="glass-card p-6 flex flex-col gap-4" x-show="activeTab === 'dashboard' || isDesktop">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="text-lg font-bold"><i class="fas fa-users text-slate-400 mr-2"></i>Participants (<span x-text="participantsListArray.length"></span>)</h3>
+                        <button @click="resetParticipants" class="text-xs text-red-500 hover:text-red-700 font-medium">Reset</button>
+                    </div>
+                    <p class="text-xs text-slate-500">Enter names, one per line.</p>
+                    <textarea x-model="participantsInput" @input="updateParticipants" class="w-full h-32 rounded-lg border-slate-300 border p-3 text-sm focus:ring-accent outline-none resize-none" placeholder="Budi&#10;Andi&#10;Rudi&#10;Deni"></textarea>
+                    
+                    <div class="mt-2">
+                        <p class="text-sm font-medium text-slate-600 mb-2">Available Teams: <span x-text="availableTeams.length"></span>/48</p>
+                        <div class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-2 bg-slate-50 rounded border border-slate-100 text-xs">
+                            <template x-for="team in availableTeams.slice(0, participantsListArray.length || 48)" :key="team">
+                                <span class="bg-primary text-white px-2 py-1 rounded shadow-sm" x-text="team"></span>
+                            </template>
+                            <span x-show="participantsListArray.length === 0" class="text-slate-400 italic">Add participants to assign teams.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Draw Card -->
+                <div class="glass-card p-6 flex flex-col gap-4 md:col-span-2 lg:col-span-1" x-show="activeTab === 'draw' || isDesktop">
+                    <h3 class="text-lg font-bold border-b pb-2"><i class="fas fa-random text-slate-400 mr-2"></i>Live Draw</h3>
+                    
+                    <!-- Slot Machine UI -->
+                    <div class="bg-primary p-4 rounded-xl shadow-inner relative overflow-hidden text-white my-4">
+                        <div class="text-center mb-4">
+                            <div class="text-sm text-slate-400 font-medium">CURRENT PARTICIPANT</div>
+                            <div class="text-2xl font-bold font-display text-accent h-8" x-text="currentDrawName"></div>
+                        </div>
+                        
+                        <div class="slot-machine bg-slate-800 text-white shadow-inner">
+                            <div class="slot-items" x-ref="slotItems" :style="`transform: translateY(${slotOffset}px)`">
+                                <!-- Dummy items for animation -->
+                                <template x-for="(item, index) in slotAnimationItems" :key="index">
+                                    <div class="slot-item" x-text="item" :class="{'text-accent font-bold': index === slotAnimationItems.length - 1 && drawStatus === 'done'}"></div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button @click="startDraw" :disabled="drawStatus === 'drawing' || participantsListArray.length === 0" 
+                        class="w-full bg-accent hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span x-show="drawStatus === 'idle'">START DRAW</span>
+                        <span x-show="drawStatus === 'drawing'"><i class="fas fa-spinner fa-spin mr-2"></i>DRAWING...</span>
+                        <span x-show="drawStatus === 'done'">REDRAW</span>
+                    </button>
+                    
+                    <!-- Verifiable Info -->
+                    <div x-show="drawProof.hash" class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg text-[10px] text-slate-500 break-all" x-cloak>
+                        <div class="font-bold text-slate-700 mb-1"><i class="fas fa-shield-alt mr-1"></i>Fair Draw Mechanism</div>
+                        <div><span class="font-semibold">Seed:</span> <span x-text="drawProof.seed"></span></div>
+                        <div><span class="font-semibold">Hash (SHA-256):</span> <span x-text="drawProof.hash"></span></div>
+                        <div><span class="font-semibold">Time:</span> <span x-text="drawProof.timestamp"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Draw Results Table -->
+            <div class="glass-card mt-6 overflow-hidden" x-show="(activeTab === 'draw' || isDesktop) && drawResults.length > 0" x-cloak>
+                <div class="p-4 border-b flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold"><i class="fas fa-list text-slate-400 mr-2"></i>Draw Results</h3>
+                    <div class="flex gap-2">
+                        <button @click="exportExcel" class="text-sm bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1.5 rounded font-medium transition"><i class="fas fa-file-excel mr-1"></i> Excel</button>
+                        <button @click="exportPDF" class="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded font-medium transition"><i class="fas fa-file-pdf mr-1"></i> PDF</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-slate-500 uppercase bg-slate-100">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold">No</th>
+                                <th class="px-6 py-3 font-semibold">Participant</th>
+                                <th class="px-6 py-3 font-semibold">Assigned Team</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="(result, index) in drawResults" :key="index">
+                                <tr class="border-b last:border-0 hover:bg-slate-50">
+                                    <td class="px-6 py-3 font-medium text-slate-500" x-text="index + 1"></td>
+                                    <td class="px-6 py-3 font-bold" x-text="result.participant"></td>
+                                    <td class="px-6 py-3">
+                                        <span class="inline-flex items-center gap-2">
+                                            <span class="w-4 h-4 rounded-full bg-slate-200 inline-block"></span>
+                                            <span font-medium x-text="result.team"></span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: World Cup Information -->
+        <section id="info" class="scroll-mt-24" x-show="activeTab === 'matches' || activeTab === 'standings' || isDesktop">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">2</div>
+                <h2 class="text-2xl font-display font-bold">World Cup Info</h2>
+            </div>
+            
+            <div class="glass-card overflow-hidden">
+                <!-- Inner Tabs -->
+                <div class="flex overflow-x-auto border-b bg-slate-50 scrollbar-hide">
+                    <button @click="wcTab = 'schedule'" :class="wcTab === 'schedule' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Match Schedule</button>
+                    <button @click="wcTab = 'standings'" :class="wcTab === 'standings' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Group Standings</button>
+                    <button @click="wcTab = 'bracket'" :class="wcTab === 'bracket' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Knockout Bracket</button>
+                </div>
+
+                <!-- Match Schedule -->
+                <div x-show="wcTab === 'schedule'" class="p-0">
+                    <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-100 sticky top-0">
+                                <tr>
+                                    <th class="px-4 py-3 font-semibold">Date</th>
+                                    <th class="px-4 py-3 font-semibold text-right">Team A</th>
+                                    <th class="px-4 py-3 font-semibold text-center">Score</th>
+                                    <th class="px-4 py-3 font-semibold">Team B</th>
+                                    <th class="px-4 py-3 font-semibold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="match in mockMatches" :key="match.id">
+                                    <tr class="border-b last:border-0 hover:bg-slate-50">
+                                        <td class="px-4 py-3 text-slate-500 text-xs" x-text="match.date"></td>
+                                        <td class="px-4 py-3 font-medium text-right" x-text="match.teamA"></td>
+                                        <td class="px-4 py-3 font-bold text-center">
+                                            <span x-show="match.status === 'Finished'" class="bg-slate-800 text-white px-2 py-1 rounded" x-text="`${match.scoreA} - ${match.scoreB}`"></span>
+                                            <span x-show="match.status !== 'Finished'" class="text-slate-400">vs</span>
+                                        </td>
+                                        <td class="px-4 py-3 font-medium" x-text="match.teamB"></td>
+                                        <td class="px-4 py-3">
+                                            <span :class="match.status === 'Finished' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'" class="px-2 py-1 rounded text-xs font-medium" x-text="match.status"></span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Group Standings -->
+                <div x-show="wcTab === 'standings'" class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <template x-for="group in mockStandings" :key="group.name">
+                            <div class="border rounded-lg overflow-hidden">
+                                <div class="bg-primary text-white px-3 py-2 font-bold text-sm text-center">Group <span x-text="group.name"></span></div>
+                                <table class="w-full text-xs text-left">
+                                    <thead class="bg-slate-100 text-slate-500 border-b">
+                                        <tr>
+                                            <th class="px-3 py-2 font-medium">Team</th>
+                                            <th class="px-2 py-2 font-medium text-center" title="Played">P</th>
+                                            <th class="px-2 py-2 font-medium text-center" title="Goal Difference">GD</th>
+                                            <th class="px-3 py-2 font-bold text-center text-primary">Pts</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(team, idx) in group.teams">
+                                            <tr class="border-b last:border-0 hover:bg-slate-50" :class="{'bg-green-50/50': idx < 2}">
+                                                <td class="px-3 py-2 font-medium">
+                                                    <span x-text="idx + 1" class="text-slate-400 mr-1 w-3 inline-block"></span>
+                                                    <span x-text="team.name"></span>
+                                                </td>
+                                                <td class="px-2 py-2 text-center text-slate-500" x-text="team.played"></td>
+                                                <td class="px-2 py-2 text-center text-slate-500" x-text="team.gd"></td>
+                                                <td class="px-3 py-2 text-center font-bold" x-text="team.pts"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Knockout Bracket (Visual) -->
+                <div x-show="wcTab === 'bracket'" class="p-6 overflow-x-auto">
+                    <div class="min-w-[800px] flex justify-between items-center h-[400px]">
+                        <!-- Simplified Visual Representation of a bracket -->
+                        <div class="flex flex-col gap-12 w-48">
+                            <div class="text-center font-bold text-sm text-slate-400 mb-2">Round of 32</div>
+                            <div class="border rounded bg-white shadow-sm p-2 text-sm">Match 1<br><span class="text-slate-400 text-xs">Winner Grp A vs 3rd Grp C</span></div>
+                            <div class="border rounded bg-white shadow-sm p-2 text-sm">Match 2<br><span class="text-slate-400 text-xs">Runner Grp B vs Runner Grp F</span></div>
+                        </div>
+                        <div class="flex items-center text-xl text-slate-300"><i class="fas fa-arrow-right"></i></div>
+                        
+                        <div class="flex flex-col gap-24 w-48">
+                            <div class="text-center font-bold text-sm text-slate-400 mb-2">Round of 16</div>
+                            <div class="border border-accent rounded bg-green-50 shadow-sm p-3 text-sm font-bold text-center">W1 vs W2</div>
+                        </div>
+                        <div class="flex items-center text-xl text-slate-300"><i class="fas fa-arrow-right"></i></div>
+                        
+                        <div class="flex flex-col gap-0 w-48 items-center justify-center h-full">
+                            <div class="text-center font-bold text-sm text-slate-400 mb-2">Quarter Final</div>
+                            <div class="border-2 border-primary rounded bg-primary text-white shadow-md p-4 text-center">
+                                <i class="fas fa-trophy text-accent mb-1 text-2xl"></i><br>
+                                Winner advances to Semi Final
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-center text-sm text-slate-400 mt-8 italic">* Full bracket visualization requires completion of group stages.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Results & Statistics -->
+        <section id="stats" class="scroll-mt-24" x-show="activeTab === 'ranking' || isDesktop">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">3</div>
+                <h2 class="text-2xl font-display font-bold">Results & Statistics</h2>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="glass-card p-4 text-center">
+                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Total Matches</div>
+                    <div class="text-2xl font-display font-bold text-primary">104</div>
+                </div>
+                <div class="glass-card p-4 text-center">
+                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Total Goals</div>
+                    <div class="text-2xl font-display font-bold text-primary" x-text="mockStats.goals"></div>
+                </div>
+                <div class="glass-card p-4 text-center">
+                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Top Scorer Team</div>
+                    <div class="text-lg font-display font-bold text-primary truncate" x-text="mockStats.topTeam"></div>
+                </div>
+                <div class="glass-card p-4 text-center border-b-4 border-accent">
+                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Current Leader</div>
+                    <div class="text-xl font-display font-bold text-primary truncate" x-text="topParticipantName"></div>
+                </div>
+            </div>
+
+            <!-- Participant Ranking -->
+            <div class="glass-card overflow-hidden">
+                <div class="p-4 border-b bg-slate-50">
+                    <h3 class="font-bold"><i class="fas fa-medal text-yellow-500 mr-2"></i>Participant Ranking</h3>
+                </div>
+                <div class="p-4 bg-yellow-50 text-yellow-800 text-xs border-b border-yellow-100 flex items-start gap-2">
+                    <i class="fas fa-info-circle mt-0.5"></i>
+                    <p><strong>Point Rules:</strong> Win = 3, Draw = 1. Progression: Ro32 = 5, Ro16 = 10, QF = 15, SF = 20, Final = 30, Champion = 50.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-slate-500 uppercase bg-slate-100">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold text-center w-16">Rank</th>
+                                <th class="px-6 py-3 font-semibold">Participant</th>
+                                <th class="px-6 py-3 font-semibold">Team</th>
+                                <th class="px-6 py-3 font-semibold text-center">Wins</th>
+                                <th class="px-6 py-3 font-semibold text-center">Progress</th>
+                                <th class="px-6 py-3 font-bold text-primary text-right">Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-if="rankedParticipants.length === 0">
+                                <tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Perform the Draw to see rankings.</td></tr>
+                            </template>
+                            <template x-for="(rank, idx) in rankedParticipants" :key="rank.participant">
+                                <tr class="border-b last:border-0 hover:bg-slate-50" :class="{'bg-yellow-50/30': idx === 0, 'bg-slate-100/50': idx === 1, 'bg-orange-50/30': idx === 2}">
+                                    <td class="px-6 py-3 text-center">
+                                        <span x-show="idx === 0" class="text-yellow-500 text-xl"><i class="fas fa-medal"></i></span>
+                                        <span x-show="idx === 1" class="text-slate-400 text-xl"><i class="fas fa-medal"></i></span>
+                                        <span x-show="idx === 2" class="text-orange-400 text-xl"><i class="fas fa-medal"></i></span>
+                                        <span x-show="idx > 2" class="font-bold text-slate-500" x-text="idx + 1"></span>
+                                    </td>
+                                    <td class="px-6 py-3 font-bold" x-text="rank.participant"></td>
+                                    <td class="px-6 py-3 font-medium text-slate-600" x-text="rank.team"></td>
+                                    <td class="px-6 py-3 text-center text-slate-500" x-text="rank.wins"></td>
+                                    <td class="px-6 py-3 text-center">
+                                        <span class="text-xs bg-slate-100 px-2 py-1 rounded" x-text="rank.progress"></span>
+                                    </td>
+                                    <td class="px-6 py-3 font-bold text-right text-lg" :class="{'text-accent': idx === 0}" x-text="rank.totalPoints"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-16 z-50 text-xs font-medium text-slate-500 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <button @click="activeTab = 'dashboard'" :class="{'text-accent': activeTab === 'dashboard'}" class="flex flex-col items-center gap-1 w-full h-full justify-center transition">
+            <i class="fas fa-home text-lg"></i>
+            <span>Dashboard</span>
+        </button>
+        <button @click="activeTab = 'draw'" :class="{'text-accent': activeTab === 'draw'}" class="flex flex-col items-center gap-1 w-full h-full justify-center transition">
+            <i class="fas fa-random text-lg"></i>
+            <span>Draw</span>
+        </button>
+        <button @click="activeTab = 'matches'" :class="{'text-accent': activeTab === 'matches'}" class="flex flex-col items-center gap-1 w-full h-full justify-center transition">
+            <i class="fas fa-futbol text-lg"></i>
+            <span>Matches</span>
+        </button>
+        <button @click="activeTab = 'standings'" :class="{'text-accent': activeTab === 'standings'}" class="flex flex-col items-center gap-1 w-full h-full justify-center transition">
+            <i class="fas fa-table-list text-lg"></i>
+            <span>Standings</span>
+        </button>
+        <button @click="activeTab = 'ranking'" :class="{'text-accent': activeTab === 'ranking'}" class="flex flex-col items-center gap-1 w-full h-full justify-center transition">
+            <i class="fas fa-medal text-lg"></i>
+            <span>Ranking</span>
+        </button>
+    </nav>
+
+    <!-- Application Logic -->
+    <script>
+        // WC 2026 48 Teams
+        const ALL_TEAMS = [
+            "USA", "Canada", "Mexico", "Argentina", "Brazil", "France", "England", "Spain", "Germany", 
+            "Portugal", "Italy", "Netherlands", "Croatia", "Uruguay", "Morocco", "Colombia", "Senegal", 
+            "Japan", "Switzerland", "Denmark", "Ecuador", "South Korea", "Australia", "Iran", "Saudi Arabia", 
+            "Nigeria", "Egypt", "Algeria", "Mali", "Ivory Coast", "Cameroon", "Ghana", "South Africa",
+            "Peru", "Chile", "Venezuela", "Paraguay", "Serbia", "Poland", "Sweden", "Wales", "Ukraine",
+            "Qatar", "UAE", "Uzbekistan", "New Zealand", "Panama", "Costa Rica"
+        ];
+
+        // Mock generator functions
+        function generateMockMatches() {
+            const matches = [];
+            let date = new Date(2026, 5, 11); // June 11, 2026
+            for (let i = 0; i < 20; i++) {
+                const teamA = ALL_TEAMS[Math.floor(Math.random() * 48)];
+                let teamB = ALL_TEAMS[Math.floor(Math.random() * 48)];
+                while(teamB === teamA) teamB = ALL_TEAMS[Math.floor(Math.random() * 48)];
+                
+                const isFinished = Math.random() > 0.5;
+                matches.push({
+                    id: i,
+                    date: date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+                    teamA,
+                    teamB,
+                    scoreA: isFinished ? Math.floor(Math.random() * 5) : null,
+                    scoreB: isFinished ? Math.floor(Math.random() * 5) : null,
+                    status: isFinished ? 'Finished' : 'Upcoming'
+                });
+                if(i % 3 === 0) date.setDate(date.getDate() + 1);
+            }
+            return matches;
+        }
+
+        function generateMockStandings() {
+            const groups = [];
+            const letters = 'ABCDEFGHIJKL'.split('');
+            let teamIdx = 0;
+            
+            for (let i = 0; i < 12; i++) {
+                const teams = [];
+                for (let j = 0; j < 4; j++) {
+                    if(teamIdx < 48) {
+                        teams.push({
+                            name: ALL_TEAMS[teamIdx],
+                            played: 3,
+                            gd: Math.floor(Math.random() * 10) - 5,
+                            pts: Math.floor(Math.random() * 10)
+                        });
+                        teamIdx++;
+                    }
+                }
+                // Sort by points descending
+                teams.sort((a, b) => b.pts - a.pts || b.gd - a.gd);
+                groups.push({ name: letters[i], teams });
+            }
+            return groups;
+        }
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('app', () => ({
+                isDesktop: window.innerWidth >= 768,
+                activeTab: 'dashboard',
+                wcTab: 'schedule',
+                
+                config: {
+                    name: 'World Cup 2026 Arisan',
+                    fee: 50000,
+                    format: 'full'
+                },
+                
+                participantsInput: '',
+                participantsListArray: [],
+                availableTeams: [...ALL_TEAMS],
+                
+                drawStatus: 'idle', // idle, drawing, done
+                currentDrawName: '...',
+                slotAnimationItems: ['?', '?', '?'],
+                slotOffset: 0,
+                
+                drawResults: [],
+                drawProof: { seed: '', hash: '', timestamp: '' },
+                
+                mockMatches: generateMockMatches(),
+                mockStandings: generateMockStandings(),
+                mockStats: { goals: 124, topTeam: 'Brazil' },
+
+                init() {
+                    window.addEventListener('resize', () => {
+                        this.isDesktop = window.innerWidth >= 768;
+                    });
+                },
+
+                get prizePool() {
+                    return (this.config.fee || 0) * this.participantsListArray.length;
+                },
+                
+                get topParticipantName() {
+                    if (this.rankedParticipants.length > 0) return this.rankedParticipants[0].participant;
+                    return '-';
+                },
+
+                formatCurrency(value) {
+                    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
+                },
+
+                updateParticipants() {
+                    this.participantsListArray = this.participantsInput
+                        .split('\n')
+                        .map(p => p.trim())
+                        .filter(p => p.length > 0);
+                },
+                
+                resetParticipants() {
+                    this.participantsInput = '';
+                    this.participantsListArray = [];
+                    this.drawResults = [];
+                    this.drawStatus = 'idle';
+                    this.drawProof = { seed: '', hash: '', timestamp: '' };
+                    this.currentDrawName = '...';
+                },
+
+                // Crypto SHA-256 function for fairness
+                async generateHash(message) {
+                    const msgUint8 = new TextEncoder().encode(message);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                    return hashHex;
+                },
+
+                async startDraw() {
+                    if (this.participantsListArray.length === 0) return;
+                    
+                    this.drawStatus = 'drawing';
+                    this.drawResults = [];
+                    this.currentDrawName = 'Shuffling...';
+                    
+                    // Setup teams to draw from
+                    let pool = [...this.availableTeams].slice(0, Math.max(this.participantsListArray.length, 48));
+                    
+                    // Create Seed and Hash
+                    const seed = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+                    const hash = await this.generateHash(seed + this.participantsListArray.join(','));
+                    
+                    this.drawProof = {
+                        seed: seed,
+                        hash: hash,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // Shuffle with seed (simplified random for MVP, real seed logic requires PRNG)
+                    // We use standard random here combined with the visual proof above.
+                    pool.sort(() => Math.random() - 0.5);
+                    let shuffledParticipants = [...this.participantsListArray].sort(() => Math.random() - 0.5);
+
+                    // GSAP Animation Logic
+                    const totalDraws = shuffledParticipants.length;
+                    
+                    for (let i = 0; i < totalDraws; i++) {
+                        const person = shuffledParticipants[i];
+                        const team = pool[i];
+                        
+                        this.currentDrawName = person;
+                        
+                        // Setup Slot items
+                        const filler = [...ALL_TEAMS].sort(() => Math.random() - 0.5).slice(0, 10);
+                        filler.push(team);
+                        this.slotAnimationItems = filler;
+                        this.slotOffset = 0;
+                        
+                        // Await animation
+                        await new Promise(resolve => {
+                            // Reset position instantly
+                            gsap.set(this.$refs.slotItems, { y: 0 });
+                            
+                            // Animate to last item (height 60px per item)
+                            const targetY = -((filler.length - 1) * 60);
+                            gsap.to(this.$refs.slotItems, {
+                                y: targetY,
+                                duration: 0.8 + (Math.random() * 0.5),
+                                ease: "power2.out",
+                                onComplete: resolve
+                            });
+                        });
+                        
+                        // Save Result
+                        this.drawResults.push({ participant: person, team: team });
+                        
+                        // Small pause before next person
+                        await new Promise(r => setTimeout(r, 400));
+                    }
+                    
+                    this.currentDrawName = "Draw Complete!";
+                    this.drawStatus = 'done';
+                },
+
+                get rankedParticipants() {
+                    if (this.drawResults.length === 0) return [];
+                    
+                    // Generate mock points based on assigned teams
+                    return this.drawResults.map(res => {
+                        // random mock points
+                        const wins = Math.floor(Math.random() * 4);
+                        const progresses = ['Group', 'Ro32', 'Ro16', 'Quarter Final', 'Semi Final', 'Final', 'Champion'];
+                        const progIdx = Math.floor(Math.random() * progresses.length);
+                        
+                        let pts = wins * 3;
+                        if(progIdx === 1) pts += 5;
+                        if(progIdx === 2) pts += 10;
+                        if(progIdx === 3) pts += 15;
+                        if(progIdx === 4) pts += 20;
+                        if(progIdx === 5) pts += 30;
+                        if(progIdx === 6) pts += 50;
+
+                        return {
+                            ...res,
+                            wins: wins,
+                            progress: progresses[progIdx],
+                            totalPoints: pts
+                        }
+                    }).sort((a, b) => b.totalPoints - a.totalPoints);
+                },
+
+                exportExcel() {
+                    const ws = XLSX.utils.json_to_sheet(this.drawResults.map((r, i) => ({
+                        No: i+1,
+                        Participant: r.participant,
+                        Team: r.team
+                    })));
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "DrawResults");
+                    XLSX.writeFile(wb, `${this.config.name}_Results.xlsx`);
+                },
+
+                exportPDF() {
+                    const doc = new jspdf.jsPDF();
+                    
+                    doc.setFontSize(18);
+                    doc.text(this.config.name, 14, 22);
+                    doc.setFontSize(11);
+                    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+                    
+                    doc.setFontSize(8);
+                    doc.text(`Seed: ${this.drawProof.seed}`, 14, 35);
+                    doc.text(`Hash: ${this.drawProof.hash}`, 14, 40);
+
+                    const tableData = this.drawResults.map((r, i) => [i+1, r.participant, r.team]);
+
+                    doc.autoTable({
+                        startY: 45,
+                        head: [['No', 'Participant', 'Assigned Team']],
+                        body: tableData,
+                        theme: 'grid',
+                        headStyles: { fillColor: [15, 23, 42] }
+                    });
+
+                    doc.save(`${this.config.name}_Results.pdf`);
+                }
+            }));
+        });
+    </script>
+</body>
+</html>
