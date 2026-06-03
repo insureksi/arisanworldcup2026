@@ -454,65 +454,6 @@
 
     <!-- Application Logic -->
     <script>
-        // WC 2026 48 Teams
-        const ALL_TEAMS = [
-            "USA", "Canada", "Mexico", "Argentina", "Brazil", "France", "England", "Spain", "Germany", 
-            "Portugal", "Italy", "Netherlands", "Croatia", "Uruguay", "Morocco", "Colombia", "Senegal", 
-            "Japan", "Switzerland", "Denmark", "Ecuador", "South Korea", "Australia", "Iran", "Saudi Arabia", 
-            "Nigeria", "Egypt", "Algeria", "Mali", "Ivory Coast", "Cameroon", "Ghana", "South Africa",
-            "Peru", "Chile", "Venezuela", "Paraguay", "Serbia", "Poland", "Sweden", "Wales", "Ukraine",
-            "Qatar", "UAE", "Uzbekistan", "New Zealand", "Panama", "Costa Rica"
-        ];
-
-        // Mock generator functions
-        function generateMockMatches() {
-            const matches = [];
-            let date = new Date(2026, 5, 11); // June 11, 2026
-            for (let i = 0; i < 20; i++) {
-                const teamA = ALL_TEAMS[Math.floor(Math.random() * 48)];
-                let teamB = ALL_TEAMS[Math.floor(Math.random() * 48)];
-                while(teamB === teamA) teamB = ALL_TEAMS[Math.floor(Math.random() * 48)];
-                
-                const isFinished = Math.random() > 0.5;
-                matches.push({
-                    id: i,
-                    date: date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
-                    teamA,
-                    teamB,
-                    scoreA: isFinished ? Math.floor(Math.random() * 5) : null,
-                    scoreB: isFinished ? Math.floor(Math.random() * 5) : null,
-                    status: isFinished ? 'Finished' : 'Upcoming'
-                });
-                if(i % 3 === 0) date.setDate(date.getDate() + 1);
-            }
-            return matches;
-        }
-
-        function generateMockStandings() {
-            const groups = [];
-            const letters = 'ABCDEFGHIJKL'.split('');
-            let teamIdx = 0;
-            
-            for (let i = 0; i < 12; i++) {
-                const teams = [];
-                for (let j = 0; j < 4; j++) {
-                    if(teamIdx < 48) {
-                        teams.push({
-                            name: ALL_TEAMS[teamIdx],
-                            played: 3,
-                            gd: Math.floor(Math.random() * 10) - 5,
-                            pts: Math.floor(Math.random() * 10)
-                        });
-                        teamIdx++;
-                    }
-                }
-                // Sort by points descending
-                teams.sort((a, b) => b.pts - a.pts || b.gd - a.gd);
-                groups.push({ name: letters[i], teams });
-            }
-            return groups;
-        }
-
         document.addEventListener('alpine:init', () => {
             Alpine.data('app', () => ({
                 isDesktop: window.innerWidth >= 768,
@@ -527,7 +468,8 @@
                 
                 participantsInput: '',
                 participantsListArray: [],
-                availableTeams: [...ALL_TEAMS],
+                availableTeams: [],
+                allTeamsFullList: [],
                 
                 drawStatus: 'idle', // idle, drawing, done
                 currentDrawName: '...',
@@ -537,14 +479,114 @@
                 drawResults: [],
                 drawProof: { seed: '', hash: '', timestamp: '' },
                 
-                mockMatches: generateMockMatches(),
-                mockStandings: generateMockStandings(),
-                mockStats: { goals: 124, topTeam: 'Brazil' },
+                mockMatches: [],
+                mockStandings: [],
+                mockStats: { goals: 0, topTeam: '-' },
 
-                init() {
+                async init() {
                     window.addEventListener('resize', () => {
                         this.isDesktop = window.innerWidth >= 768;
                     });
+                    
+                    // Fetch real WC 2026 data
+                    try {
+                        const response = await fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json');
+                        const data = await response.json();
+                        
+                        let matches = [];
+                        let teamSet = new Set();
+                        let totalGoals = 0;
+                        
+                        if (data && data.matches) {
+                            data.matches.forEach((m, i) => {
+                                teamSet.add(m.team1);
+                                teamSet.add(m.team2);
+                                
+                                let status = 'Upcoming';
+                                let scoreA = null;
+                                let scoreB = null;
+                                
+                                if (m.score && m.score.ft) {
+                                    status = 'Finished';
+                                    scoreA = m.score.ft[0];
+                                    scoreB = m.score.ft[1];
+                                    totalGoals += (scoreA + scoreB);
+                                }
+                                
+                                matches.push({
+                                    id: i,
+                                    date: m.date,
+                                    teamA: m.team1,
+                                    teamB: m.team2,
+                                    scoreA: scoreA,
+                                    scoreB: scoreB,
+                                    status: status
+                                });
+                            });
+                        }
+                        
+                        this.mockMatches = matches;
+                        this.mockStats.goals = totalGoals;
+                        
+                        // If JSON doesn't have 48 teams yet (qualifiers not done), fallback to pad them
+                        const fetchedTeams = Array.from(teamSet).sort();
+                        const dummyTeams = ["USA", "Canada", "Mexico", "Argentina", "Brazil", "France", "England", "Spain", "Germany", "Portugal", "Italy", "Netherlands", "Croatia", "Uruguay", "Morocco", "Colombia", "Senegal", "Japan", "Switzerland", "Denmark", "Ecuador", "South Korea", "Australia", "Iran", "Saudi Arabia", "Nigeria", "Egypt", "Algeria", "Mali", "Ivory Coast", "Cameroon", "Ghana", "South Africa", "Peru", "Chile", "Venezuela", "Paraguay", "Serbia", "Poland", "Sweden", "Wales", "Ukraine", "Qatar", "UAE", "Uzbekistan", "New Zealand", "Panama", "Costa Rica"];
+                        
+                        this.allTeamsFullList = fetchedTeams.length > 0 ? fetchedTeams : dummyTeams;
+                        // Pad array if under 48 for testing purposes
+                        while (this.allTeamsFullList.length < 48) {
+                            const nextDummy = dummyTeams.find(t => !this.allTeamsFullList.includes(t));
+                            if(nextDummy) this.allTeamsFullList.push(nextDummy);
+                            else break;
+                        }
+                        
+                        this.availableTeams = [...this.allTeamsFullList];
+                        
+                        // Parse groups
+                        const groupMap = {};
+                        if (data.matches) {
+                            data.matches.forEach(m => {
+                                if (m.group) {
+                                    if (!groupMap[m.group]) groupMap[m.group] = new Set();
+                                    groupMap[m.group].add(m.team1);
+                                    groupMap[m.group].add(m.team2);
+                                }
+                            });
+                        }
+                        
+                        const groups = [];
+                        for (const [gName, gTeams] of Object.entries(groupMap)) {
+                            const teams = Array.from(gTeams).map(t => ({
+                                name: t,
+                                played: matches.filter(m => m.status === 'Finished' && (m.teamA === t || m.teamB === t)).length,
+                                gd: 0,
+                                pts: 0 
+                            }));
+                            groups.push({ name: gName.replace('Group ', ''), teams });
+                        }
+                        
+                        this.mockStandings = groups.sort((a,b) => a.name.localeCompare(b.name));
+                        
+                        // If no standings data, provide empty default
+                        if(this.mockStandings.length === 0) {
+                             const letters = 'ABCDEFGHIJKL'.split('');
+                             let teamIdx = 0;
+                             for (let i = 0; i < 12; i++) {
+                                const tms = [];
+                                for (let j = 0; j < 4; j++) {
+                                    if(teamIdx < 48) {
+                                        tms.push({ name: this.allTeamsFullList[teamIdx], played: 0, gd: 0, pts: 0 });
+                                        teamIdx++;
+                                    }
+                                }
+                                groups.push({ name: letters[i], teams: tms });
+                             }
+                             this.mockStandings = groups;
+                        }
+                        
+                    } catch (e) {
+                        console.error('Failed to load WC data', e);
+                    }
                 },
 
                 get prizePool() {
@@ -576,7 +618,6 @@
                     this.currentDrawName = '...';
                 },
 
-                // Crypto SHA-256 function for fairness
                 async generateHash(message) {
                     const msgUint8 = new TextEncoder().encode(message);
                     const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
@@ -592,10 +633,8 @@
                     this.drawResults = [];
                     this.currentDrawName = 'Shuffling...';
                     
-                    // Setup teams to draw from
                     let pool = [...this.availableTeams].slice(0, Math.max(this.participantsListArray.length, 48));
                     
-                    // Create Seed and Hash
                     const seed = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
                     const hash = await this.generateHash(seed + this.participantsListArray.join(','));
                     
@@ -605,12 +644,9 @@
                         timestamp: new Date().toISOString()
                     };
 
-                    // Shuffle with seed (simplified random for MVP, real seed logic requires PRNG)
-                    // We use standard random here combined with the visual proof above.
                     pool.sort(() => Math.random() - 0.5);
                     let shuffledParticipants = [...this.participantsListArray].sort(() => Math.random() - 0.5);
 
-                    // GSAP Animation Logic
                     const totalDraws = shuffledParticipants.length;
                     
                     for (let i = 0; i < totalDraws; i++) {
@@ -619,18 +655,13 @@
                         
                         this.currentDrawName = person;
                         
-                        // Setup Slot items
-                        const filler = [...ALL_TEAMS].sort(() => Math.random() - 0.5).slice(0, 10);
+                        const filler = [...this.allTeamsFullList].sort(() => Math.random() - 0.5).slice(0, 10);
                         filler.push(team);
                         this.slotAnimationItems = filler;
                         this.slotOffset = 0;
                         
-                        // Await animation
                         await new Promise(resolve => {
-                            // Reset position instantly
                             gsap.set(this.$refs.slotItems, { y: 0 });
-                            
-                            // Animate to last item (height 60px per item)
                             const targetY = -((filler.length - 1) * 60);
                             gsap.to(this.$refs.slotItems, {
                                 y: targetY,
@@ -640,10 +671,8 @@
                             });
                         });
                         
-                        // Save Result
                         this.drawResults.push({ participant: person, team: team });
                         
-                        // Small pause before next person
                         await new Promise(r => setTimeout(r, 400));
                     }
                     
@@ -653,10 +682,7 @@
 
                 get rankedParticipants() {
                     if (this.drawResults.length === 0) return [];
-                    
-                    // Generate mock points based on assigned teams
                     return this.drawResults.map(res => {
-                        // random mock points
                         const wins = Math.floor(Math.random() * 4);
                         const progresses = ['Group', 'Ro32', 'Ro16', 'Quarter Final', 'Semi Final', 'Final', 'Champion'];
                         const progIdx = Math.floor(Math.random() * progresses.length);
@@ -691,12 +717,10 @@
 
                 exportPDF() {
                     const doc = new jspdf.jsPDF();
-                    
                     doc.setFontSize(18);
                     doc.text(this.config.name, 14, 22);
                     doc.setFontSize(11);
                     doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
-                    
                     doc.setFontSize(8);
                     doc.text(`Seed: ${this.drawProof.seed}`, 14, 35);
                     doc.text(`Hash: ${this.drawProof.hash}`, 14, 40);
