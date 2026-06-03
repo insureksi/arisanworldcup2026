@@ -100,9 +100,9 @@
                 World Cup 2026 Arisan
             </h1>
             <div class="flex gap-6">
-                <a href="#setup" class="hover:text-accent transition font-medium">Setup & Draw</a>
-                <a href="#info" class="hover:text-accent transition font-medium">WC Info</a>
-                <a href="#stats" class="hover:text-accent transition font-medium">Results & Stats</a>
+                <a href="#setup" class="hover:text-accent transition font-medium">Pengaturan & Undian</a>
+                <a href="#info" class="hover:text-accent transition font-medium">Info Piala Dunia</a>
+                <a href="#stats" class="hover:text-accent transition font-medium">Hasil & Statistik</a>
             </div>
         </div>
     </header>
@@ -113,34 +113,34 @@
         <section id="setup" class="scroll-mt-24" x-show="activeTab === 'dashboard' || activeTab === 'draw' || isDesktop">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">1</div>
-                <h2 class="text-2xl font-display font-bold">Arisan Setup & Draw</h2>
+                <h2 class="text-2xl font-display font-bold">Pengaturan & Undian Arisan</h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 
                 <!-- Config Card -->
                 <div class="glass-card p-6 flex flex-col gap-4" x-show="activeTab === 'dashboard' || isDesktop">
-                    <h3 class="text-lg font-bold border-b pb-2"><i class="fas fa-cog text-slate-400 mr-2"></i>Configuration</h3>
+                    <h3 class="text-lg font-bold border-b pb-2"><i class="fas fa-cog text-slate-400 mr-2"></i>Konfigurasi</h3>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Arisan Name</label>
-                        <input type="text" x-model="config.name" class="w-full rounded-lg border-slate-300 border p-2 focus:ring-accent focus:border-accent outline-none" placeholder="e.g. Kantor Arisan">
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Nama Arisan</label>
+                        <input type="text" x-model="config.name" class="w-full rounded-lg border-slate-300 border p-2 focus:ring-accent focus:border-accent outline-none" placeholder="mis. Arisan Kantor">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">Fee/Person</label>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Biaya/Orang</label>
                             <input type="number" x-model.number="config.fee" class="w-full rounded-lg border-slate-300 border p-2 focus:ring-accent outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-600 mb-1">Format</label>
                             <select x-model="config.format" class="w-full rounded-lg border-slate-300 border p-2 focus:ring-accent outline-none">
-                                <option value="full">Full Tournament</option>
-                                <option value="group">Group Stage Only</option>
-                                <option value="knockout">Knockout Only</option>
+                                <option value="full">Turnamen Penuh</option>
+                                <option value="group">Hanya Babak Grup</option>
+                                <option value="knockout">Hanya Babak Gugur</option>
                             </select>
                         </div>
                     </div>
                     <div class="mt-auto bg-slate-50 p-4 rounded-lg border border-slate-100 flex justify-between items-center">
-                        <span class="font-medium text-slate-600">Total Prize Pool</span>
+                        <span class="font-medium text-slate-600">Total Hadiah</span>
                         <span class="text-xl font-bold text-accent" x-text="formatCurrency(prizePool)"></span>
                     </div>
                 </div>
@@ -148,31 +148,31 @@
                 <!-- Participants Card -->
                 <div class="glass-card p-6 flex flex-col gap-4" x-show="activeTab === 'dashboard' || isDesktop">
                     <div class="flex justify-between items-center border-b pb-2">
-                        <h3 class="text-lg font-bold"><i class="fas fa-users text-slate-400 mr-2"></i>Participants (<span x-text="participantsListArray.length"></span>)</h3>
+                        <h3 class="text-lg font-bold"><i class="fas fa-users text-slate-400 mr-2"></i>Peserta (<span x-text="participantsListArray.length"></span>)</h3>
                         <button @click="resetParticipants" class="text-xs text-red-500 hover:text-red-700 font-medium">Reset</button>
                     </div>
-                    <p class="text-xs text-slate-500">Enter names, one per line.</p>
+                    <p class="text-xs text-slate-500">Masukkan nama, satu per baris.</p>
                     <textarea x-model="participantsInput" @input="updateParticipants" class="w-full h-32 rounded-lg border-slate-300 border p-3 text-sm focus:ring-accent outline-none resize-none" placeholder="Budi&#10;Andi&#10;Rudi&#10;Deni"></textarea>
                     
                     <div class="mt-2">
-                        <p class="text-sm font-medium text-slate-600 mb-2">Available Teams: <span x-text="availableTeams.length"></span>/48</p>
+                        <p class="text-sm font-medium text-slate-600 mb-2">Tim Tersedia: <span x-text="availableTeams.length"></span>/48</p>
                         <div class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-2 bg-slate-50 rounded border border-slate-100 text-xs">
                             <template x-for="team in availableTeams.slice(0, participantsListArray.length || 48)" :key="team">
                                 <span class="bg-primary text-white px-2 py-1 rounded shadow-sm flex items-center" x-html="getTeamFlag(team) + team"></span>
                             </template>
-                            <span x-show="participantsListArray.length === 0" class="text-slate-400 italic">Add participants to assign teams.</span>
+                            <span x-show="participantsListArray.length === 0" class="text-slate-400 italic">Tambahkan peserta untuk menentukan tim.</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Live Draw Card -->
                 <div class="glass-card p-6 flex flex-col gap-4 md:col-span-2 lg:col-span-1" x-show="activeTab === 'draw' || isDesktop">
-                    <h3 class="text-lg font-bold border-b pb-2"><i class="fas fa-random text-slate-400 mr-2"></i>Live Draw</h3>
+                    <h3 class="text-lg font-bold border-b pb-2"><i class="fas fa-random text-slate-400 mr-2"></i>Undian Langsung</h3>
                     
                     <!-- Slot Machine UI -->
                     <div class="bg-primary p-4 rounded-xl shadow-inner relative overflow-hidden text-white my-4">
                         <div class="text-center mb-4">
-                            <div class="text-sm text-slate-400 font-medium">CURRENT PARTICIPANT</div>
+                            <div class="text-sm text-slate-400 font-medium">PESERTA SAAT INI</div>
                             <div class="text-2xl font-bold font-display text-accent h-8" x-text="currentDrawName"></div>
                         </div>
                         
@@ -188,17 +188,17 @@
 
                     <button @click="startDraw" :disabled="drawStatus === 'drawing' || participantsListArray.length === 0" 
                         class="w-full bg-accent hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span x-show="drawStatus === 'idle'">START DRAW</span>
-                        <span x-show="drawStatus === 'drawing'"><i class="fas fa-spinner fa-spin mr-2"></i>DRAWING...</span>
-                        <span x-show="drawStatus === 'done'">REDRAW</span>
+                        <span x-show="drawStatus === 'idle'">MULAI UNDIAN</span>
+                        <span x-show="drawStatus === 'drawing'"><i class="fas fa-spinner fa-spin mr-2"></i>MENGUNDI...</span>
+                        <span x-show="drawStatus === 'done'">UNDI ULANG</span>
                     </button>
                     
                     <!-- Verifiable Info -->
                     <div x-show="drawProof.hash" class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg text-[10px] text-slate-500 break-all" x-cloak>
-                        <div class="font-bold text-slate-700 mb-1"><i class="fas fa-shield-alt mr-1"></i>Fair Draw Mechanism</div>
+                        <div class="font-bold text-slate-700 mb-1"><i class="fas fa-shield-alt mr-1"></i>Mekanisme Undian Adil</div>
                         <div><span class="font-semibold">Seed:</span> <span x-text="drawProof.seed"></span></div>
                         <div><span class="font-semibold">Hash (SHA-256):</span> <span x-text="drawProof.hash"></span></div>
-                        <div><span class="font-semibold">Time:</span> <span x-text="drawProof.timestamp"></span></div>
+                        <div><span class="font-semibold">Waktu:</span> <span x-text="drawProof.timestamp"></span></div>
                     </div>
                 </div>
             </div>
@@ -206,7 +206,7 @@
             <!-- Draw Results Table -->
             <div class="glass-card mt-6 overflow-hidden" x-show="(activeTab === 'draw' || isDesktop) && drawResults.length > 0" x-cloak>
                 <div class="p-4 border-b flex justify-between items-center bg-slate-50">
-                    <h3 class="font-bold"><i class="fas fa-list text-slate-400 mr-2"></i>Draw Results</h3>
+                    <h3 class="font-bold"><i class="fas fa-list text-slate-400 mr-2"></i>Hasil Undian</h3>
                     <div class="flex gap-2">
                         <button @click="exportExcel" class="text-sm bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1.5 rounded font-medium transition"><i class="fas fa-file-excel mr-1"></i> Excel</button>
                         <button @click="exportPDF" class="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded font-medium transition"><i class="fas fa-file-pdf mr-1"></i> PDF</button>
@@ -217,8 +217,8 @@
                         <thead class="text-xs text-slate-500 uppercase bg-slate-100">
                             <tr>
                                 <th class="px-6 py-3 font-semibold">No</th>
-                                <th class="px-6 py-3 font-semibold">Participant</th>
-                                <th class="px-6 py-3 font-semibold">Assigned Team</th>
+                                <th class="px-6 py-3 font-semibold">Peserta</th>
+                                <th class="px-6 py-3 font-semibold">Tim Ditetapkan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -243,16 +243,16 @@
         <section id="info" class="scroll-mt-24" x-show="activeTab === 'matches' || activeTab === 'standings' || isDesktop">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">2</div>
-                <h2 class="text-2xl font-display font-bold">World Cup Info</h2>
+                <h2 class="text-2xl font-display font-bold">Info Piala Dunia</h2>
             </div>
             
             <div class="glass-card overflow-hidden">
                 <!-- Inner Tabs -->
                 <div class="flex overflow-x-auto border-b bg-slate-50 scrollbar-hide">
-                    <button @click="wcTab = 'teams'" :class="wcTab === 'teams' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Teams</button>
-                    <button @click="wcTab = 'schedule'" :class="wcTab === 'schedule' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Match Schedule</button>
-                    <button @click="wcTab = 'standings'" :class="wcTab === 'standings' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Group Standings</button>
-                    <button @click="wcTab = 'bracket'" :class="wcTab === 'bracket' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Knockout Bracket</button>
+                    <button @click="wcTab = 'teams'" :class="wcTab === 'teams' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Tim</button>
+                    <button @click="wcTab = 'schedule'" :class="wcTab === 'schedule' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Jadwal Pertandingan</button>
+                    <button @click="wcTab = 'standings'" :class="wcTab === 'standings' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Klasemen Grup</button>
+                    <button @click="wcTab = 'bracket'" :class="wcTab === 'bracket' ? 'border-accent text-accent' : 'border-transparent text-slate-500 hover:text-slate-700'" class="px-6 py-4 border-b-2 font-medium whitespace-nowrap transition">Bagan Gugur</button>
                 </div>
 
                 <!-- Teams List -->
@@ -263,11 +263,11 @@
                                 <div class="mb-2"><img :src="team.flag_icon" class="w-12 h-8 rounded shadow-sm object-cover border border-slate-200" :alt="team.name"></div>
                                 <div class="font-bold text-sm text-primary leading-tight" x-text="team.name"></div>
                                 <div class="text-xs text-slate-500 mt-1" x-text="team.confed"></div>
-                                <div class="text-xs font-medium text-accent mt-1" x-text="'Group ' + team.group"></div>
+                                <div class="text-xs font-medium text-accent mt-1" x-text="'Grup ' + team.group"></div>
                             </div>
                         </template>
                         <div x-show="wcTeams.length === 0" class="col-span-full text-center text-slate-400 py-8">
-                            Loading teams...
+                            Memuat tim...
                         </div>
                     </div>
                 </div>
@@ -278,10 +278,10 @@
                         <table class="w-full text-sm text-left">
                             <thead class="text-xs text-slate-500 uppercase bg-slate-100 sticky top-0">
                                 <tr>
-                                    <th class="px-4 py-3 font-semibold">Date</th>
-                                    <th class="px-4 py-3 font-semibold text-right">Team A</th>
-                                    <th class="px-4 py-3 font-semibold text-center">Score</th>
-                                    <th class="px-4 py-3 font-semibold">Team B</th>
+                                    <th class="px-4 py-3 font-semibold">Tanggal</th>
+                                    <th class="px-4 py-3 font-semibold text-right">Tim A</th>
+                                    <th class="px-4 py-3 font-semibold text-center">Skor</th>
+                                    <th class="px-4 py-3 font-semibold">Tim B</th>
                                     <th class="px-4 py-3 font-semibold">Status</th>
                                 </tr>
                             </thead>
@@ -296,7 +296,7 @@
                                         </td>
                                         <td class="px-4 py-3 font-medium" x-html="getTeamFlag(match.teamB) + match.teamB"></td>
                                         <td class="px-4 py-3">
-                                            <span :class="match.status === 'Finished' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'" class="px-2 py-1 rounded text-xs font-medium" x-text="match.status"></span>
+                                            <span :class="match.status === 'Finished' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'" class="px-2 py-1 rounded text-xs font-medium" x-text="match.status === 'Finished' ? 'Selesai' : (match.status === 'Live' ? 'Langsung' : 'Akan Datang')"></span>
                                         </td>
                                     </tr>
                                 </template>
@@ -310,14 +310,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         <template x-for="group in mockStandings" :key="group.name">
                             <div class="border rounded-lg overflow-hidden">
-                                <div class="bg-primary text-white px-3 py-2 font-bold text-sm text-center">Group <span x-text="group.name"></span></div>
+                                <div class="bg-primary text-white px-3 py-2 font-bold text-sm text-center">Grup <span x-text="group.name"></span></div>
                                 <table class="w-full text-xs text-left">
                                     <thead class="bg-slate-100 text-slate-500 border-b">
                                         <tr>
-                                            <th class="px-3 py-2 font-medium">Team</th>
-                                            <th class="px-2 py-2 font-medium text-center" title="Played">P</th>
-                                            <th class="px-2 py-2 font-medium text-center" title="Goal Difference">GD</th>
-                                            <th class="px-3 py-2 font-bold text-center text-primary">Pts</th>
+                                            <th class="px-3 py-2 font-medium">Tim</th>
+                                            <th class="px-2 py-2 font-medium text-center" title="Main">M</th>
+                                            <th class="px-2 py-2 font-medium text-center" title="Selisih Gol">SG</th>
+                                            <th class="px-3 py-2 font-bold text-center text-primary">Poin</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -344,27 +344,27 @@
                     <div class="min-w-[800px] flex justify-between items-center h-[400px]">
                         <!-- Simplified Visual Representation of a bracket -->
                         <div class="flex flex-col gap-12 w-48">
-                            <div class="text-center font-bold text-sm text-slate-400 mb-2">Round of 32</div>
-                            <div class="border rounded bg-white shadow-sm p-2 text-sm">Match 1<br><span class="text-slate-400 text-xs">Winner Grp A vs 3rd Grp C</span></div>
-                            <div class="border rounded bg-white shadow-sm p-2 text-sm">Match 2<br><span class="text-slate-400 text-xs">Runner Grp B vs Runner Grp F</span></div>
+                            <div class="text-center font-bold text-sm text-slate-400 mb-2">Babak 32 Besar</div>
+                            <div class="border rounded bg-white shadow-sm p-2 text-sm">Pertandingan 1<br><span class="text-slate-400 text-xs">Juara Grup A vs Posisi 3 Grup C</span></div>
+                            <div class="border rounded bg-white shadow-sm p-2 text-sm">Pertandingan 2<br><span class="text-slate-400 text-xs">Runner-up Grup B vs Runner-up Grup F</span></div>
                         </div>
                         <div class="flex items-center text-xl text-slate-300"><i class="fas fa-arrow-right"></i></div>
                         
                         <div class="flex flex-col gap-24 w-48">
-                            <div class="text-center font-bold text-sm text-slate-400 mb-2">Round of 16</div>
-                            <div class="border border-accent rounded bg-green-50 shadow-sm p-3 text-sm font-bold text-center">W1 vs W2</div>
+                            <div class="text-center font-bold text-sm text-slate-400 mb-2">Babak 16 Besar</div>
+                            <div class="border border-accent rounded bg-green-50 shadow-sm p-3 text-sm font-bold text-center">M1 vs M2</div>
                         </div>
                         <div class="flex items-center text-xl text-slate-300"><i class="fas fa-arrow-right"></i></div>
                         
                         <div class="flex flex-col gap-0 w-48 items-center justify-center h-full">
-                            <div class="text-center font-bold text-sm text-slate-400 mb-2">Quarter Final</div>
+                            <div class="text-center font-bold text-sm text-slate-400 mb-2">Perempat Final</div>
                             <div class="border-2 border-primary rounded bg-primary text-white shadow-md p-4 text-center">
                                 <i class="fas fa-trophy text-accent mb-1 text-2xl"></i><br>
-                                Winner advances to Semi Final
+                                Pemenang lolos ke Semifinal
                             </div>
                         </div>
                     </div>
-                    <p class="text-center text-sm text-slate-400 mt-8 italic">* Full bracket visualization requires completion of group stages.</p>
+                    <p class="text-center text-sm text-slate-400 mt-8 italic">* Visualisasi bagan lengkap memerlukan penyelesaian babak grup.</p>
                 </div>
             </div>
         </section>
@@ -373,24 +373,24 @@
         <section id="stats" class="scroll-mt-24" x-show="activeTab === 'ranking' || isDesktop">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">3</div>
-                <h2 class="text-2xl font-display font-bold">Results & Statistics</h2>
+                <h2 class="text-2xl font-display font-bold">Hasil & Statistik</h2>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="glass-card p-4 text-center">
-                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Total Matches</div>
+                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Total Pertandingan</div>
                     <div class="text-2xl font-display font-bold text-primary">104</div>
                 </div>
                 <div class="glass-card p-4 text-center">
-                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Total Goals</div>
+                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Total Gol</div>
                     <div class="text-2xl font-display font-bold text-primary" x-text="mockStats.goals"></div>
                 </div>
                 <div class="glass-card p-4 text-center">
-                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Top Scorer Team</div>
+                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Tim Pencetak Gol Terbanyak</div>
                     <div class="text-lg font-display font-bold text-primary truncate" x-text="mockStats.topTeam"></div>
                 </div>
                 <div class="glass-card p-4 text-center border-b-4 border-accent">
-                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Current Leader</div>
+                    <div class="text-slate-500 text-xs font-bold uppercase mb-1">Pemimpin Saat Ini</div>
                     <div class="text-xl font-display font-bold text-primary truncate" x-text="topParticipantName"></div>
                 </div>
             </div>
@@ -398,27 +398,27 @@
             <!-- Participant Ranking -->
             <div class="glass-card overflow-hidden">
                 <div class="p-4 border-b bg-slate-50">
-                    <h3 class="font-bold"><i class="fas fa-medal text-yellow-500 mr-2"></i>Participant Ranking</h3>
+                    <h3 class="font-bold"><i class="fas fa-medal text-yellow-500 mr-2"></i>Peringkat Peserta</h3>
                 </div>
                 <div class="p-4 bg-yellow-50 text-yellow-800 text-xs border-b border-yellow-100 flex items-start gap-2">
                     <i class="fas fa-info-circle mt-0.5"></i>
-                    <p><strong>Point Rules:</strong> Win = 3, Draw = 1. Progression: Ro32 = 5, Ro16 = 10, QF = 15, SF = 20, Final = 30, Champion = 50.</p>
+                    <p><strong>Aturan Poin:</strong> Menang = 3, Seri = 1. Lolos: B32 = 5, B16 = 10, PF = 15, SF = 20, Final = 30, Juara = 50.</p>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
                         <thead class="text-xs text-slate-500 uppercase bg-slate-100">
                             <tr>
-                                <th class="px-6 py-3 font-semibold text-center w-16">Rank</th>
-                                <th class="px-6 py-3 font-semibold">Participant</th>
-                                <th class="px-6 py-3 font-semibold">Team</th>
-                                <th class="px-6 py-3 font-semibold text-center">Wins</th>
-                                <th class="px-6 py-3 font-semibold text-center">Progress</th>
-                                <th class="px-6 py-3 font-bold text-primary text-right">Points</th>
+                                <th class="px-6 py-3 font-semibold text-center w-16">Peringkat</th>
+                                <th class="px-6 py-3 font-semibold">Peserta</th>
+                                <th class="px-6 py-3 font-semibold">Tim</th>
+                                <th class="px-6 py-3 font-semibold text-center">Menang</th>
+                                <th class="px-6 py-3 font-semibold text-center">Progres</th>
+                                <th class="px-6 py-3 font-bold text-primary text-right">Poin</th>
                             </tr>
                         </thead>
                         <tbody>
                             <template x-if="rankedParticipants.length === 0">
-                                <tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Perform the Draw to see rankings.</td></tr>
+                                <tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Lakukan Undian untuk melihat peringkat.</td></tr>
                             </template>
                             <template x-for="(rank, idx) in rankedParticipants" :key="rank.participant">
                                 <tr class="border-b last:border-0 hover:bg-slate-50" :class="{'bg-yellow-50/30': idx === 0, 'bg-slate-100/50': idx === 1, 'bg-orange-50/30': idx === 2}">
@@ -462,7 +462,7 @@
                             <h2 class="text-2xl font-display font-bold text-primary" x-text="selectedTeamData.name"></h2>
                             <div class="flex items-center gap-2 mt-2">
                                 <span class="px-2 py-1 bg-slate-200 text-slate-600 text-xs font-bold rounded shadow-inner" x-text="selectedTeamData.confed"></span>
-                                <span class="px-2 py-1 bg-accent text-white text-xs font-bold rounded shadow-inner" x-text="'Group ' + selectedTeamData.group"></span>
+                                <span class="px-2 py-1 bg-accent text-white text-xs font-bold rounded shadow-inner" x-text="'Grup ' + selectedTeamData.group"></span>
                             </div>
                         </div>
                     </template>
@@ -472,7 +472,7 @@
                 <div class="p-6 overflow-y-auto flex flex-col gap-6">
                     <!-- Next Match -->
                     <div>
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider border-b pb-2 mb-4"><i class="fas fa-calendar-alt mr-2"></i>Next Match</h3>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider border-b pb-2 mb-4"><i class="fas fa-calendar-alt mr-2"></i>Pertandingan Berikutnya</h3>
                         <template x-if="nextMatchData">
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col items-center shadow-sm">
                                 <div class="text-xs text-slate-500 font-medium mb-4 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100" x-text="nextMatchData.date"></div>
@@ -482,7 +482,7 @@
                                         <span class="font-bold text-sm text-primary leading-tight mt-1" x-text="nextMatchData.teamA"></span>
                                     </div>
                                     <div class="w-1/5 flex flex-col items-center justify-center">
-                                        <span class="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm" x-show="nextMatchData.status === 'Live'">LIVE</span>
+                                        <span class="bg-primary text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm" x-show="nextMatchData.status === 'Live'">LANGSUNG</span>
                                         <span class="text-slate-400 font-bold text-sm" x-show="nextMatchData.status !== 'Live'">VS</span>
                                     </div>
                                     <div class="flex flex-col items-center gap-2 w-2/5 text-center">
@@ -494,19 +494,19 @@
                         </template>
                         <template x-if="!nextMatchData">
                             <div class="text-center p-6 border border-dashed border-slate-300 rounded-xl bg-slate-50 text-slate-500 text-sm">
-                                No upcoming matches scheduled.
+                                Tidak ada pertandingan yang dijadwalkan.
                             </div>
                         </template>
                     </div>
 
                     <!-- Squad & Staff (Placeholder) -->
                     <div>
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider border-b pb-2 mb-4"><i class="fas fa-users mr-2"></i>Squad & Staff</h3>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider border-b pb-2 mb-4"><i class="fas fa-users mr-2"></i>Skuad & Staf</h3>
                         <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-xl flex items-start gap-3 shadow-sm">
                             <i class="fas fa-info-circle mt-0.5 text-yellow-600 text-lg"></i>
                             <div class="text-sm">
-                                <p class="font-bold mb-1">Data Not Yet Available</p>
-                                <p class="text-yellow-700/80 leading-relaxed">Official squad lists, coaches, and player positions for the 2026 World Cup have not been finalized or announced yet. This section will be updated closer to the tournament.</p>
+                                <p class="font-bold mb-1">Data Belum Tersedia</p>
+                                <p class="text-yellow-700/80 leading-relaxed">Daftar skuad resmi, pelatih, dan posisi pemain untuk Piala Dunia 2026 belum final atau diumumkan. Bagian ini akan diperbarui mendekati turnamen.</p>
                             </div>
                         </div>
                     </div>
@@ -519,23 +519,23 @@
     <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-16 z-50 text-xs font-medium text-slate-500 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <button @click="activeTab = 'dashboard'" :class="{'text-accent': activeTab === 'dashboard'}" class="flex flex-col items-center gap-1 w-full h-full justify-center transition">
             <i class="fas fa-home text-lg"></i>
-            <span>Dashboard</span>
+            <span>Dasbor</span>
         </button>
         <button @click="activeTab = 'draw'" :class="{'text-accent': activeTab === 'draw'}" class="flex flex-col items-center gap-1 w-full h-full justify-center transition">
             <i class="fas fa-random text-lg"></i>
-            <span>Draw</span>
+            <span>Undian</span>
         </button>
         <button @click="activeTab = 'matches'" :class="{'text-accent': activeTab === 'matches'}" class="flex flex-col items-center gap-1 w-full h-full justify-center transition">
             <i class="fas fa-futbol text-lg"></i>
-            <span>Matches</span>
+            <span>Pertandingan</span>
         </button>
         <button @click="activeTab = 'standings'" :class="{'text-accent': activeTab === 'standings'}" class="flex flex-col items-center gap-1 w-full h-full justify-center transition">
             <i class="fas fa-table-list text-lg"></i>
-            <span>Standings</span>
+            <span>Klasemen</span>
         </button>
         <button @click="activeTab = 'ranking'" :class="{'text-accent': activeTab === 'ranking'}" class="flex flex-col items-center gap-1 w-full h-full justify-center transition">
             <i class="fas fa-medal text-lg"></i>
-            <span>Ranking</span>
+            <span>Peringkat</span>
         </button>
     </nav>
 
@@ -736,7 +736,7 @@
                     
                     this.drawStatus = 'drawing';
                     this.drawResults = [];
-                    this.currentDrawName = 'Shuffling...';
+                    this.currentDrawName = 'Mengacak...';
                     
                     let pool = [...this.availableTeams].slice(0, Math.max(this.participantsListArray.length, 48));
                     
@@ -781,7 +781,7 @@
                         await new Promise(r => setTimeout(r, 400));
                     }
                     
-                    this.currentDrawName = "Draw Complete!";
+                    this.currentDrawName = "Undian Selesai!";
                     this.drawStatus = 'done';
                 },
 
@@ -789,7 +789,7 @@
                     if (this.drawResults.length === 0) return [];
                     return this.drawResults.map(res => {
                         const wins = Math.floor(Math.random() * 4);
-                        const progresses = ['Group', 'Ro32', 'Ro16', 'Quarter Final', 'Semi Final', 'Final', 'Champion'];
+                        const progresses = ['Grup', 'B32', 'B16', 'Perempat Final', 'Semifinal', 'Final', 'Juara'];
                         const progIdx = Math.floor(Math.random() * progresses.length);
                         
                         let pts = wins * 3;
