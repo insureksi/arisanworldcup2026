@@ -158,7 +158,7 @@
                         <p class="text-sm font-medium text-slate-600 mb-2">Available Teams: <span x-text="availableTeams.length"></span>/48</p>
                         <div class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-2 bg-slate-50 rounded border border-slate-100 text-xs">
                             <template x-for="team in availableTeams.slice(0, participantsListArray.length || 48)" :key="team">
-                                <span class="bg-primary text-white px-2 py-1 rounded shadow-sm" x-text="getTeamFlag(team) + team"></span>
+                                <span class="bg-primary text-white px-2 py-1 rounded shadow-sm flex items-center" x-html="getTeamFlag(team) + team"></span>
                             </template>
                             <span x-show="participantsListArray.length === 0" class="text-slate-400 italic">Add participants to assign teams.</span>
                         </div>
@@ -180,7 +180,7 @@
                             <div class="slot-items" x-ref="slotItems" :style="`transform: translateY(${slotOffset}px)`">
                                 <!-- Dummy items for animation -->
                                 <template x-for="(item, index) in slotAnimationItems" :key="index">
-                                    <div class="slot-item" :class="{'text-accent font-bold': index === slotAnimationItems.length - 1 && drawStatus === 'done'}" x-text="getTeamFlag(item) + item"></div>
+                                    <div class="slot-item" :class="{'text-accent font-bold': index === slotAnimationItems.length - 1 && drawStatus === 'done'}" x-html="getTeamFlag(item) + item"></div>
                                 </template>
                             </div>
                         </div>
@@ -228,7 +228,7 @@
                                     <td class="px-6 py-3 font-bold" x-text="result.participant"></td>
                                     <td class="px-6 py-3">
                                         <span class="inline-flex items-center gap-2">
-                                            <span font-medium x-text="getTeamFlag(result.team) + result.team"></span>
+                                            <span class="font-medium inline-flex items-center" x-html="getTeamFlag(result.team) + result.team"></span>
                                         </span>
                                     </td>
                                 </tr>
@@ -260,7 +260,7 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                         <template x-for="team in wcTeams" :key="team.name">
                             <div class="border rounded-lg p-4 flex flex-col items-center justify-center text-center bg-white shadow-sm hover:shadow-md transition">
-                                <div class="text-4xl mb-2" x-text="team.flag_icon"></div>
+                                <div class="mb-2"><img :src="team.flag_icon" class="w-12 h-8 rounded shadow-sm object-cover border border-slate-200" :alt="team.name"></div>
                                 <div class="font-bold text-sm text-primary leading-tight" x-text="team.name"></div>
                                 <div class="text-xs text-slate-500 mt-1" x-text="team.confed"></div>
                                 <div class="text-xs font-medium text-accent mt-1" x-text="'Group ' + team.group"></div>
@@ -289,12 +289,12 @@
                                 <template x-for="match in mockMatches" :key="match.id">
                                     <tr class="border-b last:border-0 hover:bg-slate-50">
                                         <td class="px-4 py-3 text-slate-500 text-xs" x-text="match.date"></td>
-                                        <td class="px-4 py-3 font-medium text-right" x-text="getTeamFlag(match.teamA) + match.teamA"></td>
+                                        <td class="px-4 py-3 font-medium text-right" x-html="getTeamFlag(match.teamA) + match.teamA"></td>
                                         <td class="px-4 py-3 font-bold text-center">
-                                            <span x-show="match.status === 'Finished'" class="bg-slate-800 text-white px-2 py-1 rounded" x-text="`${match.scoreA} - ${match.scoreB}`"></span>
-                                            <span x-show="match.status !== 'Finished'" class="text-slate-400">vs</span>
+                                            <span x-show="match.status === 'Finished' || match.status === 'Live'" class="bg-slate-800 text-white px-2 py-1 rounded" x-text="`${match.scoreA} - ${match.scoreB}`"></span>
+                                            <span x-show="match.status !== 'Finished' && match.status !== 'Live'" class="text-slate-400">vs</span>
                                         </td>
-                                        <td class="px-4 py-3 font-medium" x-text="getTeamFlag(match.teamB) + match.teamB"></td>
+                                        <td class="px-4 py-3 font-medium" x-html="getTeamFlag(match.teamB) + match.teamB"></td>
                                         <td class="px-4 py-3">
                                             <span :class="match.status === 'Finished' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'" class="px-2 py-1 rounded text-xs font-medium" x-text="match.status"></span>
                                         </td>
@@ -325,7 +325,7 @@
                                             <tr class="border-b last:border-0 hover:bg-slate-50" :class="{'bg-green-50/50': idx < 2}">
                                                 <td class="px-3 py-2 font-medium">
                                                     <span x-text="idx + 1" class="text-slate-400 mr-1 w-3 inline-block"></span>
-                                                    <span x-text="getTeamFlag(team.name) + team.name"></span>
+                                                    <span class="inline-flex items-center" x-html="getTeamFlag(team.name) + team.name"></span>
                                                 </td>
                                                 <td class="px-2 py-2 text-center text-slate-500" x-text="team.played"></td>
                                                 <td class="px-2 py-2 text-center text-slate-500" x-text="team.gd"></td>
@@ -429,7 +429,7 @@
                                         <span x-show="idx > 2" class="font-bold text-slate-500" x-text="idx + 1"></span>
                                     </td>
                                     <td class="px-6 py-3 font-bold" x-text="rank.participant"></td>
-                                    <td class="px-6 py-3 font-medium text-slate-600" x-text="getTeamFlag(rank.team) + rank.team"></td>
+                                    <td class="px-6 py-3 font-medium text-slate-600" x-html="getTeamFlag(rank.team) + rank.team"></td>
                                     <td class="px-6 py-3 text-center text-slate-500" x-text="rank.wins"></td>
                                     <td class="px-6 py-3 text-center">
                                         <span class="text-xs bg-slate-100 px-2 py-1 rounded" x-text="rank.progress"></span>
@@ -506,43 +506,51 @@
                         this.isDesktop = window.innerWidth >= 768;
                     });
                     
-                    // Fetch real WC 2026 data
                     try {
                         // Fetch Teams
-                        const teamsRes = await fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.teams.json');
+                        const teamsRes = await fetch('https://worldcup26.ir/get/teams');
                         if (teamsRes.ok) {
-                            this.wcTeams = await teamsRes.json();
+                            const teamsData = await teamsRes.json();
+                            this.wcTeams = teamsData.teams.map(t => ({
+                                id: t.id,
+                                name: t.name_en,
+                                flag_icon: t.flag,
+                                group: t.groups,
+                                confed: t.iso2 || ''
+                            }));
                         }
 
                         // Fetch Matches
-                        const response = await fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json');
+                        const response = await fetch('https://worldcup26.ir/get/games');
                         const data = await response.json();
                         
                         let matches = [];
-                        let teamSet = new Set();
                         let totalGoals = 0;
                         
-                        if (data && data.matches) {
-                            data.matches.forEach((m, i) => {
-                                teamSet.add(m.team1);
-                                teamSet.add(m.team2);
-                                
+                        if (data && data.games) {
+                            data.games.forEach((m, i) => {
                                 let status = 'Upcoming';
-                                let scoreA = null;
-                                let scoreB = null;
-                                
-                                if (m.score && m.score.ft) {
+                                if (m.finished === 'TRUE' || m.finished === true) {
                                     status = 'Finished';
-                                    scoreA = m.score.ft[0];
-                                    scoreB = m.score.ft[1];
+                                } else if (m.time_elapsed && m.time_elapsed !== 'notstarted') {
+                                    status = 'Live';
+                                }
+                                
+                                let scoreA = parseInt(m.home_score) || 0;
+                                let scoreB = parseInt(m.away_score) || 0;
+                                
+                                if (status === 'Finished' || status === 'Live') {
                                     totalGoals += (scoreA + scoreB);
+                                } else {
+                                    scoreA = null;
+                                    scoreB = null;
                                 }
                                 
                                 matches.push({
-                                    id: i,
-                                    date: m.date,
-                                    teamA: m.team1,
-                                    teamB: m.team2,
+                                    id: m.id || i,
+                                    date: m.local_date,
+                                    teamA: m.home_team_name_en,
+                                    teamB: m.away_team_name_en,
                                     scoreA: scoreA,
                                     scoreB: scoreB,
                                     status: status
@@ -553,60 +561,32 @@
                         this.mockMatches = matches;
                         this.mockStats.goals = totalGoals;
                         
-                        // Populate available teams from wcTeams instead of matches to avoid placeholders like "1A"
+                        // Populate available teams
                         const fetchedTeams = this.wcTeams.map(t => t.name).sort();
-                        const dummyTeams = ["USA", "Canada", "Mexico", "Argentina", "Brazil", "France", "England", "Spain", "Germany", "Portugal", "Italy", "Netherlands", "Croatia", "Uruguay", "Morocco", "Colombia", "Senegal", "Japan", "Switzerland", "Denmark", "Ecuador", "South Korea", "Australia", "Iran", "Saudi Arabia", "Nigeria", "Egypt", "Algeria", "Mali", "Ivory Coast", "Cameroon", "Ghana", "South Africa", "Peru", "Chile", "Venezuela", "Paraguay", "Serbia", "Poland", "Sweden", "Wales", "Ukraine", "Qatar", "UAE", "Uzbekistan", "New Zealand", "Panama", "Costa Rica"];
-                        
-                        this.allTeamsFullList = fetchedTeams.length > 0 ? fetchedTeams : dummyTeams;
-                        // Pad array if under 48 for testing purposes
-                        while (this.allTeamsFullList.length < 48) {
-                            const nextDummy = dummyTeams.find(t => !this.allTeamsFullList.includes(t));
-                            if(nextDummy) this.allTeamsFullList.push(nextDummy);
-                            else break;
-                        }
-                        
+                        this.allTeamsFullList = fetchedTeams;
                         this.availableTeams = [...this.allTeamsFullList];
                         
-                        // Parse groups from matches, but only for actual teams
-                        const groupMap = {};
-                        if (data.matches) {
-                            data.matches.forEach(m => {
-                                if (m.group) {
-                                    if (!groupMap[m.group]) groupMap[m.group] = new Set();
-                                    if (this.allTeamsFullList.includes(m.team1)) groupMap[m.group].add(m.team1);
-                                    if (this.allTeamsFullList.includes(m.team2)) groupMap[m.group].add(m.team2);
-                                }
-                            });
-                        }
-                        
-                        const groups = [];
-                        for (const [gName, gTeams] of Object.entries(groupMap)) {
-                            const teams = Array.from(gTeams).map(t => ({
-                                name: t,
-                                played: matches.filter(m => m.status === 'Finished' && (m.teamA === t || m.teamB === t)).length,
-                                gd: 0,
-                                pts: 0 
-                            }));
-                            groups.push({ name: gName.replace('Group ', ''), teams });
-                        }
-                        
-                        this.mockStandings = groups.sort((a,b) => a.name.localeCompare(b.name));
-                        
-                        // If no standings data, provide empty default
-                        if(this.mockStandings.length === 0) {
-                             const letters = 'ABCDEFGHIJKL'.split('');
-                             let teamIdx = 0;
-                             for (let i = 0; i < 12; i++) {
-                                const tms = [];
-                                for (let j = 0; j < 4; j++) {
-                                    if(teamIdx < 48) {
-                                        tms.push({ name: this.allTeamsFullList[teamIdx], played: 0, gd: 0, pts: 0 });
-                                        teamIdx++;
-                                    }
-                                }
-                                groups.push({ name: letters[i], teams: tms });
-                             }
-                             this.mockStandings = groups;
+                        // Fetch Groups
+                        const groupsRes = await fetch('https://worldcup26.ir/get/groups');
+                        if (groupsRes.ok) {
+                            const groupsData = await groupsRes.json();
+                            if (groupsData && groupsData.groups) {
+                                const parsedGroups = groupsData.groups.map(g => {
+                                    return {
+                                        name: g.name,
+                                        teams: g.teams.map(t => {
+                                            const teamInfo = this.wcTeams.find(wt => wt.id === t.team_id);
+                                            return {
+                                                name: teamInfo ? teamInfo.name : 'Unknown',
+                                                played: t.mp,
+                                                gd: t.gd,
+                                                pts: t.pts
+                                            };
+                                        }).sort((a,b) => b.pts - a.pts || b.gd - a.gd)
+                                    };
+                                });
+                                this.mockStandings = parsedGroups.sort((a,b) => a.name.localeCompare(b.name));
+                            }
                         }
                         
                     } catch (e) {
@@ -619,8 +599,8 @@
                 },
                 
                 getTeamFlag(teamName) {
-                    const team = this.wcTeams.find(t => t.name === teamName || t.name_normalised === teamName);
-                    return team && team.flag_icon ? team.flag_icon + ' ' : '';
+                    const team = this.wcTeams.find(t => t.name === teamName);
+                    return team && team.flag_icon ? `<img src="${team.flag_icon}" class="w-5 h-3.5 inline-block rounded-sm shadow-sm mr-1.5 align-middle">` : '';
                 },
                 
                 get topParticipantName() {
