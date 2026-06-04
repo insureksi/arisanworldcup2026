@@ -237,6 +237,19 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Supported By Section -->
+            <div class="mt-8 glass-card p-6 flex flex-col items-center justify-center gap-4 text-center">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2 mb-2 w-full max-w-xs mx-auto">Didukung Oleh</h3>
+                <div class="flex flex-wrap justify-center items-center gap-6 md:gap-10">
+                    <template x-for="logo in sponsorsList" :key="logo">
+                        <img :src="'sponsors/' + logo" class="h-12 md:h-16 object-contain grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition duration-300" :alt="logo">
+                    </template>
+                    <div x-show="sponsorsList.length === 0" class="text-slate-400 text-[10px] w-full text-center italic">
+                        Belum ada logo sponsor yang ditambahkan.
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- SECTION 2: World Cup Information -->
@@ -561,12 +574,15 @@
 
     <script src="staticData.js"></script>
     <!-- Application Logic -->
+    <script src="sponsors_data.js"></script>
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('app', () => ({
                 isDesktop: window.innerWidth >= 768,
                 activeTab: 'dashboard',
                 wcTab: 'teams',
+                
+                sponsorsList: DAFTAR_SPONSOR,
                 
                 config: {
                     name: 'World Cup 2026 Arisan',
